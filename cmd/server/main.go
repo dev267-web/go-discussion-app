@@ -4,6 +4,7 @@ package main
 import (
 	"log"
 	"os"
+	"context"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -22,13 +23,12 @@ import (
 
 func main() {
 	// Load environment variables and config
-	cfg, err := config.LoadConfig(".")
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	// Initialize DB connection
-	dbConn, err := db.InitPostgres(cfg)
+	dbConn, err := db.InitPostgres(context.Background())
 	if err != nil {
 		log.Fatalf("Failed to connect to DB: %v", err)
 	}
@@ -54,7 +54,7 @@ func main() {
 
 	// Protected routes group (JWT middleware)
 	protected := router.Group("/")
-	protected.Use(middleware.JWTAuth(cfg.JWTSecret))
+	protected.Use(middleware.JWTAuth())
 
 	user.RegisterRoutes(protected, dbConn)
 	discussion.RegisterRoutes(protected, dbConn)
