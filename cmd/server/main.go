@@ -49,7 +49,7 @@ func main() {
 	router.Use(gin.Recovery())
 
 	// Public routes
-        auth.RegisterRoutes(router, dbConn, cfg.JWTSecret)
+        auth.RegisterRoutes(router, dbConn)
 	health.RegisterRoutes(router)
 
 	// Protected routes group (JWT middleware)
