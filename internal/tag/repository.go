@@ -12,6 +12,8 @@ import (
 type TagRepository interface {
     // GetAll returns all tags in the database.
     GetAll(ctx context.Context) ([]models.Tag, error)
+    GetByName(ctx context.Context, name string) (*models.Tag, error)
+    Create(ctx context.Context, name string) (int, error)
 }
 
 type repo struct {
@@ -47,4 +49,27 @@ func (r *repo) GetAll(ctx context.Context) ([]models.Tag, error) {
         return nil, err
     }
     return tags, nil
+}
+func (r *repo) GetByName(ctx context.Context, name string) (*models.Tag, error) {
+    const q = `SELECT id, name, created_at FROM tags WHERE name = $1;`
+    row := r.db.QueryRowContext(ctx, q, name)
+    var t models.Tag
+    if err := row.Scan(&t.ID, &t.Name, &t.CreatedAt); err != nil {
+        if err == sql.ErrNoRows {
+            return nil, nil
+        }
+        return nil, err
+    }
+    return &t, nil
+}
+
+func (r *repo) Create(ctx context.Context, name string) (int, error) {
+    const q = `
+        INSERT INTO tags (name, created_at)
+        VALUES ($1, NOW())
+        RETURNING id;
+    `
+    var id int
+    err := r.db.QueryRowContext(ctx, q, name).Scan(&id)
+    return id, err
 }

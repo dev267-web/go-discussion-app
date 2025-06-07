@@ -50,7 +50,7 @@ func main() {
 
 	// Public routes
         auth.RegisterRoutes(router, dbConn)
-	health.RegisterRoutes(router)
+	health.RegisterRoutes(router, dbConn)
 
 	// Protected routes group (JWT middleware)
 	protected := router.Group("/")
